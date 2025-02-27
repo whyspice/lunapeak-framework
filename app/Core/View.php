@@ -29,7 +29,7 @@ class View
 
     public static function init()
     {
-        $loader = new FilesystemLoader(BASE_PATH . '/app/Views');
+        $loader = new FilesystemLoader(BASE_PATH . '/views');
         self::$twig = new Environment($loader);
 
         self::$twig->addGlobal('app_name', Config::get('app.name'));

@@ -22,19 +22,22 @@ namespace App\Core;
 
 class Config
 {
-    protected static $config = [];
+    protected static array $config = [];
 
-    public static function load($file)
+    public static function load(string $file): void
     {
         $path = BASE_PATH . '/config/' . $file . '.php';
         if (file_exists($path)) {
-            self::$config[$file] = require $path;
+            $configData = require $path;
+            if (is_array($configData)) {
+                self::$config[$file] = $configData;
+            }
         }
     }
 
-    public static function get($key, $default = null)
+    public static function get(string $key, mixed $default = null): mixed
     {
-        list($file, $param) = explode('.', $key, 2);
+        [$file, $param] = explode('.', $key, 2);
         return self::$config[$file][$param] ?? $default;
     }
 }

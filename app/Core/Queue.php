@@ -24,21 +24,34 @@ use Predis\Client;
 
 class Queue
 {
-    protected $redis;
+    protected Client $redis;
 
     public function __construct()
     {
-        $config = require_once BASE_PATH . '/config/queue.php';
-        $this->redis = new Client($config['redis']);
+        $config = Config::get('queue.redis', []);
+        if (!is_array($config) || empty($config['host']) || !isset($config['port'])) {
+            throw new \RuntimeException('Invalid Redis configuration');
+        }
+        $this->redis = new Client([
+            'host' => $config['host'],
+            'port' => (int) $config['port'],
+            'database' => (int) ($config['database'] ?? 0),
+        ]);
     }
 
-    public function push($queue, $job)
+    public function push(string $queue, mixed $job): void
     {
+        if (empty($queue)) {
+            throw new \InvalidArgumentException('Queue name cannot be empty');
+        }
         $this->redis->rpush($queue, serialize($job));
     }
 
-    public function pop($queue)
+    public function pop(string $queue): mixed
     {
+        if (empty($queue)) {
+            throw new \InvalidArgumentException('Queue name cannot be empty');
+        }
         $job = $this->redis->lpop($queue);
         return $job ? unserialize($job) : null;
     }

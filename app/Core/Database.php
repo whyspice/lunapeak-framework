@@ -24,7 +24,7 @@ use R;
 
 class Database
 {
-    public static function connect()
+    public static function connect(): void
     {
         Config::load('database');
         $config = [
@@ -34,6 +34,10 @@ class Database
             "username" => Config::get('database.username'),
             "password" => Config::get('database.password'),
         ];
+
+        if (empty($config['driver']) || empty($config['host']) || empty($config['database'])) {
+            throw new \RuntimeException('Invalid database configuration');
+        }
 
         $dsn = "{$config['driver']}:host={$config['host']};dbname={$config['database']}";
         R::setup($dsn, $config['username'], $config['password']);

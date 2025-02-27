@@ -1,5 +1,5 @@
 {
-  "name": "lunapeak/framework",
+  "name": "whyspice/lunapeak-framework",
   "description": "A lightweight PHP framework",
   "version": "1.0.0",
   "require": {
