@@ -19,11 +19,10 @@ root@localhost:~ bash ./whyspice-work.sh
 # Connection closed by remote host.
 */
 namespace App\Core;
-use App\Core\Config;
 
 class Router
 {
-    protected $routes = [
+    protected array $routes = [
         'GET' => [],
         'POST' => [],
         'PUT' => [],
@@ -31,32 +30,64 @@ class Router
         'DELETE' => [],
     ];
 
-    public function get($route, $handler)
+    public function __construct()
+    {
+        $this->loadRoutes(BASE_PATH . '/routes/web.php');
+        $this->loadRoutes(BASE_PATH . '/routes/api.php', '/api');
+    }
+
+    protected function loadRoutes(string $file, string $prefix = ''): void
+    {
+        if (file_exists($file)) {
+            $router = $this;
+            require $file;
+
+            if ($prefix) {
+                $this->applyPrefix($prefix);
+            }
+        }
+    }
+
+    protected function applyPrefix(string $prefix): void
+    {
+        foreach ($this->routes as $method => $routes) {
+            $prefixedRoutes = [];
+            foreach ($routes as $route => $handler) {
+                if (!str_starts_with($route, $prefix)) {
+                    $prefixedRoutes[$prefix . $route] = $handler;
+                    unset($this->routes[$method][$route]);
+                }
+            }
+            $this->routes[$method] = array_merge($this->routes[$method], $prefixedRoutes);
+        }
+    }
+
+    public function get(string $route, array $handler): void
     {
         $this->routes['GET'][$route] = $handler;
     }
 
-    public function post($route, $handler)
+    public function post(string $route, array $handler): void
     {
         $this->routes['POST'][$route] = $handler;
     }
 
-    public function put($route, $handler)
+    public function put(string $route, array $handler): void
     {
         $this->routes['PUT'][$route] = $handler;
     }
 
-    public function patch($route, $handler)
+    public function patch(string $route, array $handler): void
     {
         $this->routes['PATCH'][$route] = $handler;
     }
 
-    public function delete($route, $handler)
+    public function delete(string $route, array $handler): void
     {
         $this->routes['DELETE'][$route] = $handler;
     }
 
-    public function match(array $methods, $route, $handler)
+    public function match(array $methods, string $route, array $handler): void
     {
         foreach ($methods as $method) {
             $method = strtoupper($method);
@@ -66,27 +97,27 @@ class Router
         }
     }
 
-    public function any($route, $handler)
+    public function any(string $route, array $handler): void
     {
         foreach ($this->routes as $method => &$paths) {
             $paths[$route] = $handler;
         }
     }
 
-    public function dispatch()
+    public function dispatch(): void
     {
         $uri = $_SERVER['REQUEST_URI'];
         $method = $_SERVER['REQUEST_METHOD'];
-        $isApi = strpos($uri, '/api') === 0;
+        $isApi = str_starts_with($uri, '/api');
 
         foreach ($this->routes[$method] as $route => $handler) {
             $pattern = preg_replace('/\{(\w+)\}/', '(\w+)', $route);
             $pattern = "#^$pattern$#";
             if (preg_match($pattern, $uri, $matches)) {
                 array_shift($matches);
-                list($controller, $action) = explode('@', $handler);
-                $controller = "App\\Controllers\\$controller";
-                $response = call_user_func_array([new $controller(), $action], $matches);
+                [$controller, $action] = $handler;
+                $instance = new $controller();
+                $response = call_user_func_array([$instance, $action], $matches);
                 if ($isApi) {
                     header('Content-Type: application/json; charset=utf-8');
                     echo json_encode($response, JSON_UNESCAPED_UNICODE);
@@ -99,14 +130,13 @@ class Router
         $this->show404($isApi);
     }
 
-    protected function show404($isApi = false)
+    protected function show404(bool $isApi = false): void
     {
+        header('HTTP/1.0 404 Not Found');
         if ($isApi) {
-            header('HTTP/1.0 404 Not Found');
             header('Content-Type: application/json');
-            echo json_encode(['error' => 'not found']);
+            echo json_encode(['error' => 'API route not found']);
         } else {
-            header('HTTP/1.0 404 Not Found');
             View::render('errors/404.twig');
         }
         exit;

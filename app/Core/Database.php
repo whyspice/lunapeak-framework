@@ -26,21 +26,18 @@ class Database
 {
     public static function connect(): void
     {
-        Config::load('database');
-        $config = [
-            "driver" => Config::get('database.driver'),
-            "host" => Config::get('database.host'),
-            "database" => Config::get('database.database'),
-            "username" => Config::get('database.username'),
-            "password" => Config::get('database.password'),
-        ];
+        $driver = Config::get('DB_CONNECTION');
+        $host = Config::get('DB_HOST');
+        $database = Config::get('DB_DATABASE');
+        $username = Config::get('DB_USERNAME', '');
+        $password = Config::get('DB_PASSWORD', '');
 
-        if (empty($config['driver']) || empty($config['host']) || empty($config['database'])) {
+        if (!$driver || !$host || !$database) {
             throw new \RuntimeException('Invalid database configuration');
         }
 
-        $dsn = "{$config['driver']}:host={$config['host']};dbname={$config['database']}";
-        R::setup($dsn, $config['username'], $config['password']);
+        $dsn = "{$driver}:host={$host};dbname={$database}";
+        R::setup($dsn, $username, $password);
         R::freeze(true);
 
         if (!R::testConnection()) {

@@ -20,24 +20,22 @@ root@localhost:~ bash ./whyspice-work.sh
 */
 namespace App\Core;
 
+use Dotenv\Dotenv;
+
 class Config
 {
     protected static array $config = [];
 
-    public static function load(string $file): void
+    public static function load(): void
     {
-        $path = BASE_PATH . '/config/' . $file . '.php';
-        if (file_exists($path)) {
-            $configData = require $path;
-            if (is_array($configData)) {
-                self::$config[$file] = $configData;
-            }
-        }
+        $dotenv = Dotenv::createImmutable(BASE_PATH);
+        $dotenv->load();
+
+        self::$config = $_ENV;
     }
 
     public static function get(string $key, mixed $default = null): mixed
     {
-        [$file, $param] = explode('.', $key, 2);
-        return self::$config[$file][$param] ?? $default;
+        return self::$config[$key] ?? $default;
     }
 }

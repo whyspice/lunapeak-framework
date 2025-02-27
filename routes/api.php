@@ -18,26 +18,11 @@ root@localhost:~ bash ./whyspice-work.sh
 
 # Connection closed by remote host.
 */
-define('BASE_PATH', realpath(__DIR__ . '/../'));
 
-require_once BASE_PATH . '/vendor/autoload.php';
+global $router;
 
-use App\Core\Database;
-use App\Core\Config;
+use App\Controllers\ApiController;
 use App\Core\Router;
-use App\Core\View;
-use Tracy\Debugger;
 
-Config::load();
-
-if (Config::get('APP_DEBUG', false)) {
-    Debugger::enable(Debugger::DEVELOPMENT);
-} else {
-    Debugger::enable(Debugger::PRODUCTION);
-}
-
-Database::connect();
-View::init();
-
-$router = new Router();
-$router->dispatch();
+$router->get('/data', [ApiController::class, 'getData']);
+$router->post('/create', [ApiController::class, 'createData']);

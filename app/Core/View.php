@@ -32,10 +32,10 @@ class View
         $loader = new FilesystemLoader(BASE_PATH . '/views');
         self::$twig = new Environment($loader);
 
-        self::$twig->addGlobal('app_name', Config::get('app.name'));
-        self::$twig->addGlobal('app_version', Config::get('app.version'));
-        self::$twig->addGlobal('app_url', Config::get('app.url'));
-        self::$twig->addGlobal('app_debug', Config::get('app.debug'));
+        self::$twig->addGlobal('app_name', Config::get('APP_NAME'));
+        self::$twig->addGlobal('app_version', Config::get('APP_VERSION'));
+        self::$twig->addGlobal('app_url', Config::get('APP_URL'));
+        self::$twig->addGlobal('app_debug', Config::get('APP_DEBUG'));
         self::$twig->addGlobal('unixtime', time());
     }
 

@@ -28,14 +28,18 @@ class Queue
 
     public function __construct()
     {
-        $config = Config::get('queue.redis', []);
-        if (!is_array($config) || empty($config['host']) || !isset($config['port'])) {
+        $host = Config::get('REDIS_HOST');
+        $port = Config::get('REDIS_PORT');
+        $database = Config::get('REDIS_DATABASE', 0);
+
+        if (!$host || !$port) {
             throw new \RuntimeException('Invalid Redis configuration');
         }
+
         $this->redis = new Client([
-            'host' => $config['host'],
-            'port' => (int) $config['port'],
-            'database' => (int) ($config['database'] ?? 0),
+            'host' => $host,
+            'port' => (int) $port,
+            'database' => (int) $database,
         ]);
     }
 
