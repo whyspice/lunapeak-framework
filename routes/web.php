@@ -18,9 +18,8 @@ root@localhost:~ bash ./whyspice-work.sh
 
 # Connection closed by remote host.
 */
-
-global $router;
-
+/** @var App\Core\Router $router */
 use App\Controllers\HomeController;
+use App\Core\Router;
 
 $router->get('/', [HomeController::class, 'index']);

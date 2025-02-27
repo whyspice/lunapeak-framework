@@ -18,10 +18,9 @@ root@localhost:~ bash ./whyspice-work.sh
 
 # Connection closed by remote host.
 */
-
-global $router;
-
+/** @var App\Core\Router $router */
 use App\Controllers\ApiController;
+use App\Core\Router;
 
 $router->get('/data', [ApiController::class, 'getData']);
 $router->post('/create', [ApiController::class, 'createData']);

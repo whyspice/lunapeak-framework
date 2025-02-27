@@ -40,22 +40,25 @@ class Router
     {
         if (file_exists($file)) {
             $router = $this;
+            $originalRoutes = $this->routes;
             require $file;
+            $newRoutes = array_diff_key($this->routes, $originalRoutes);
 
             if ($prefix) {
-                $this->applyPrefix($prefix);
+                $this->applyPrefix($prefix, $newRoutes);
             }
         }
     }
 
-    protected function applyPrefix(string $prefix): void
+    protected function applyPrefix(string $prefix, array &$newRoutes): void
     {
-        foreach ($this->routes as $method => $routes) {
+        foreach ($newRoutes as $method => $routes) {
             $prefixedRoutes = [];
             foreach ($routes as $route => $handler) {
                 if (!str_starts_with($route, $prefix)) {
                     $prefixedRoutes[$prefix . $route] = $handler;
-                    unset($this->routes[$method][$route]);
+                } else {
+                    $prefixedRoutes[$route] = $handler;
                 }
             }
             $this->routes[$method] = array_merge($this->routes[$method], $prefixedRoutes);

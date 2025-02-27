@@ -36,7 +36,7 @@ if (Config::get('APP_DEBUG', false)) {
     Debugger::enable(Debugger::PRODUCTION);
 }
 
-Database::connect();
+//Database::connect();
 View::init();
 
 $router = new Router();

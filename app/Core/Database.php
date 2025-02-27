@@ -20,7 +20,7 @@ root@localhost:~ bash ./whyspice-work.sh
 */
 namespace App\Core;
 
-use R;
+use \RedBeanPHP\R as R;
 
 class Database
 {
