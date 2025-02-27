@@ -27,7 +27,7 @@ class View
 {
     protected static $twig;
 
-    public static function init()
+    public static function init(): void
     {
         $loader = new FilesystemLoader(BASE_PATH . '/views');
         self::$twig = new Environment($loader);

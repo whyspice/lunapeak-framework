@@ -22,9 +22,5 @@ root@localhost:~ bash ./whyspice-work.sh
 global $router;
 
 use App\Controllers\HomeController;
-use App\Controllers\EmailController;
-use App\Core\Router;
 
 $router->get('/', [HomeController::class, 'index']);
-$router->get('/email-form', [EmailController::class, 'showForm']);
-$router->post('/send-email', [EmailController::class, 'sendEmail']);

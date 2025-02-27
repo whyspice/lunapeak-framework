@@ -48,7 +48,7 @@ class Queue
         if (empty($queue)) {
             throw new \InvalidArgumentException('Queue name cannot be empty');
         }
-        $this->redis->rpush($queue, serialize($job));
+        $this->redis->rpush($queue, (array)serialize($job));
     }
 
     public function pop(string $queue): mixed

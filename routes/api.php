@@ -22,7 +22,6 @@ root@localhost:~ bash ./whyspice-work.sh
 global $router;
 
 use App\Controllers\ApiController;
-use App\Core\Router;
 
 $router->get('/data', [ApiController::class, 'getData']);
 $router->post('/create', [ApiController::class, 'createData']);

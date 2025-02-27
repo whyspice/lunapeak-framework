@@ -26,7 +26,7 @@ class ApiController
     {
         return [
             'status' => 'success',
-            'data' => ['message' => 'Это данные из API']
+            'data' => ['message' => 'Hello, LunaPeak!']
         ];
     }
 
