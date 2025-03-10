@@ -19,7 +19,15 @@ root@localhost:~ bash ./whyspice-work.sh
 # Connection closed by remote host.
 */
 /** @var App\Core\Router $router */
-use App\Controllers\HomeController;
 use App\Core\Router;
+use App\Controllers\HomeController;
+use App\Controllers\UserController;
 
 $router->get('/', [HomeController::class, 'index']);
+$router->group('/users', function (Router $router) {
+    $router->get('/{id}', [UserController::class, 'show']);
+    $router->post('/create', [UserController::class, 'create']);
+    $router->post('/upload-avatar', [UserController::class, 'uploadAvatar']);
+    $router->patch('/{user}/update', [UserController::class, 'update']);
+    $router->delete('/{user}/delete', [UserController::class, 'delete']);
+});

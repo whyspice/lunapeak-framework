@@ -28,6 +28,7 @@ use App\Core\Router;
 use App\Core\View;
 use Tracy\Debugger;
 
+session_start();
 Config::load();
 
 if (Config::get('APP_DEBUG', false)) {

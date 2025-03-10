@@ -22,6 +22,7 @@ namespace App\Core;
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use Twig\TwigFunction;
 
 class View
 {
@@ -37,6 +38,9 @@ class View
         self::$twig->addGlobal('app_url', Config::get('APP_URL'));
         self::$twig->addGlobal('app_debug', Config::get('APP_DEBUG'));
         self::$twig->addGlobal('unixtime', time());
+        self::$twig->addFunction(new TwigFunction('csrf', function () {
+            return '<input type="hidden" name="_csrf" value="' . htmlspecialchars(Csrf::generateToken()) . '">';
+        }));
     }
 
     public static function render($template, $data = [])

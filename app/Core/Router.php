@@ -29,6 +29,7 @@ class Router
         'PATCH' => [],
         'DELETE' => [],
     ];
+    protected string $currentPrefix = '';
 
     public function __construct()
     {
@@ -41,8 +42,10 @@ class Router
         if (file_exists($file)) {
             $router = $this;
             $originalRoutes = $this->routes;
+            $this->currentPrefix = $prefix;
             require $file;
             $newRoutes = array_diff_key($this->routes, $originalRoutes);
+            $this->currentPrefix = '';
 
             if ($prefix) {
                 $this->applyPrefix($prefix, $newRoutes);
@@ -55,66 +58,78 @@ class Router
         foreach ($newRoutes as $method => $routes) {
             $prefixedRoutes = [];
             foreach ($routes as $route => $handler) {
-                if (!str_starts_with($route, $prefix)) {
-                    $prefixedRoutes[$prefix . $route] = $handler;
-                } else {
-                    $prefixedRoutes[$route] = $handler;
-                }
+                $prefixedRoute = rtrim($prefix, '/') . '/' . ltrim($route, '/');
+                $prefixedRoutes[$prefixedRoute] = $handler;
             }
             $this->routes[$method] = array_merge($this->routes[$method], $prefixedRoutes);
         }
     }
 
+    public function group(string $prefix, callable $callback): void
+    {
+        $originalPrefix = $this->currentPrefix;
+        $this->currentPrefix = rtrim($originalPrefix, '/') . '/' . ltrim($prefix, '/');
+        $callback($this);
+        $this->currentPrefix = $originalPrefix;
+    }
+
     public function get(string $route, array $handler): void
     {
-        $this->routes['GET'][$route] = $handler;
+        $fullRoute = $this->currentPrefix . $route;
+        $this->routes['GET'][$fullRoute] = $handler;
     }
 
     public function post(string $route, array $handler): void
     {
-        $this->routes['POST'][$route] = $handler;
+        $fullRoute = $this->currentPrefix . $route;
+        $this->routes['POST'][$fullRoute] = $handler;
     }
 
     public function put(string $route, array $handler): void
     {
-        $this->routes['PUT'][$route] = $handler;
+        $fullRoute = $this->currentPrefix . $route;
+        $this->routes['PUT'][$fullRoute] = $handler;
     }
 
     public function patch(string $route, array $handler): void
     {
-        $this->routes['PATCH'][$route] = $handler;
+        $fullRoute = $this->currentPrefix . $route;
+        $this->routes['PATCH'][$fullRoute] = $handler;
     }
 
     public function delete(string $route, array $handler): void
     {
-        $this->routes['DELETE'][$route] = $handler;
+        $fullRoute = $this->currentPrefix . $route;
+        $this->routes['DELETE'][$fullRoute] = $handler;
     }
 
     public function match(array $methods, string $route, array $handler): void
     {
+        $fullRoute = $this->currentPrefix . $route;
         foreach ($methods as $method) {
             $method = strtoupper($method);
             if (array_key_exists($method, $this->routes)) {
-                $this->routes[$method][$route] = $handler;
+                $this->routes[$method][$fullRoute] = $handler;
             }
         }
     }
 
     public function any(string $route, array $handler): void
     {
+        $fullRoute = $this->currentPrefix . $route;
         foreach ($this->routes as $method => &$paths) {
-            $paths[$route] = $handler;
+            $paths[$fullRoute] = $handler;
         }
     }
 
     public function dispatch(): void
     {
-        $uri = $_SERVER['REQUEST_URI'];
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // Учитываем только путь
         $method = $_SERVER['REQUEST_METHOD'];
-        $isApi = str_starts_with($uri, '/api');
+        $isApi = strpos($uri, '/api') === 0;
 
         foreach ($this->routes[$method] as $route => $handler) {
-            $pattern = preg_replace('/\{(\w+)\}/', '(\w+)', $route);
+            $pattern = preg_replace('/\{(\w+)\}/', '([^/]+)', $route);
             $pattern = "#^$pattern$#";
             if (preg_match($pattern, $uri, $matches)) {
                 array_shift($matches);
@@ -122,8 +137,8 @@ class Router
                 $instance = new $controller();
                 $response = call_user_func_array([$instance, $action], $matches);
                 if ($isApi) {
-                    header('Content-Type: application/json; charset=utf-8');
-                    echo json_encode($response, JSON_UNESCAPED_UNICODE);
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
                 } else {
                     View::render($response);
                 }
