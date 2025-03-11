@@ -38,7 +38,7 @@
 2. **Установите зависимости:**
    ```bash
    composer install
-
+   
 3. **Настройте окружение:**
    - Скопируйте .env.example в .env и укажите параметры базы данных
    ```
@@ -47,11 +47,11 @@
    DB_DATABASE=lunapeak
    DB_USERNAME=root
    DB_PASSWORD=
-
+   
 4. Создайте структуру базы данных:
    ```
    php artisan migrate
-
+   
 ---
 
 ## Структура проекта
