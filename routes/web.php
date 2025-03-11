@@ -20,11 +20,15 @@ root@localhost:~ bash ./whyspice-work.sh
 */
 /** @var App\Core\Router $router */
 use App\Core\Router;
+
 use App\Controllers\HomeController;
 use App\Controllers\UserController;
 
+use App\Middleware\AuthMiddleware;
+
 $router->get('/', [HomeController::class, 'index']);
-$router->group('/users', function (Router $router) {
+
+$router->middleware(AuthMiddleware::class)->group('/users', function (Router $router) {
     $router->get('/{id}', [UserController::class, 'show']);
     $router->post('/create', [UserController::class, 'create']);
     $router->post('/upload-avatar', [UserController::class, 'uploadAvatar']);

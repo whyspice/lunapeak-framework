@@ -30,6 +30,7 @@ class Router
         'DELETE' => [],
     ];
     protected string $currentPrefix = '';
+    protected array $currentMiddleware = [];
 
     public function __construct()
     {
@@ -68,39 +69,47 @@ class Router
     public function group(string $prefix, callable $callback): void
     {
         $originalPrefix = $this->currentPrefix;
+        $originalMiddleware = $this->currentMiddleware;
         $this->currentPrefix = rtrim($originalPrefix, '/') . '/' . ltrim($prefix, '/');
         $callback($this);
         $this->currentPrefix = $originalPrefix;
+        $this->currentMiddleware = $originalMiddleware;
+    }
+
+    public function middleware(array|string $middleware): self
+    {
+        $this->currentMiddleware = array_merge($this->currentMiddleware, (array)$middleware);
+        return $this;
     }
 
     public function get(string $route, array $handler): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['GET'][$fullRoute] = $handler;
+        $this->routes['GET'][$fullRoute] = [$handler, $this->currentMiddleware];
     }
 
     public function post(string $route, array $handler): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['POST'][$fullRoute] = $handler;
+        $this->routes['POST'][$fullRoute] = [$handler, $this->currentMiddleware];
     }
 
     public function put(string $route, array $handler): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['PUT'][$fullRoute] = $handler;
+        $this->routes['PUT'][$fullRoute] = [$handler, $this->currentMiddleware];
     }
 
     public function patch(string $route, array $handler): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['PATCH'][$fullRoute] = $handler;
+        $this->routes['PATCH'][$fullRoute] = [$handler, $this->currentMiddleware];
     }
 
     public function delete(string $route, array $handler): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['DELETE'][$fullRoute] = $handler;
+        $this->routes['DELETE'][$fullRoute] = [$handler, $this->currentMiddleware];
     }
 
     public function match(array $methods, string $route, array $handler): void
@@ -109,7 +118,7 @@ class Router
         foreach ($methods as $method) {
             $method = strtoupper($method);
             if (array_key_exists($method, $this->routes)) {
-                $this->routes[$method][$fullRoute] = $handler;
+                $this->routes[$method][$fullRoute] = [$handler, $this->currentMiddleware];
             }
         }
     }
@@ -118,7 +127,7 @@ class Router
     {
         $fullRoute = $this->currentPrefix . $route;
         foreach ($this->routes as $method => &$paths) {
-            $paths[$fullRoute] = $handler;
+            $paths[$fullRoute] = [$handler, $this->currentMiddleware];
         }
     }
 
@@ -129,7 +138,8 @@ class Router
         $method = $request->method();
         $isApi = strpos($uri, '/api') === 0;
 
-        foreach ($this->routes[$method] as $route => $handler) {
+        foreach ($this->routes[$method] as $route => $routeData) {
+            [$handler, $middleware] = $routeData;
             $pattern = preg_replace('/\{(\w+)\}/', '([^/]+)', $route);
             $pattern = "#^$pattern$#";
             if (preg_match($pattern, $uri, $matches)) {
@@ -148,8 +158,10 @@ class Router
                     }
                 }
 
-                $response = $reflection->invokeArgs($instance, $args);
-                if ($isApi) {
+                $callable = fn() => $reflection->invokeArgs($instance, $args);
+                $response = $this->runMiddleware($request, $middleware, $callable);
+
+                if ($isApi ) {
                     header('Content-Type: application/json');
                     echo json_encode($response);
                 } else {
@@ -161,13 +173,27 @@ class Router
         $this->show404($isApi);
     }
 
+    protected function runMiddleware(Request $request, array $middleware, callable $handler): mixed
+    {
+        $stack = array_reverse($middleware);
+        $next = $handler;
+
+        foreach ($stack as $middlewareClass) {
+            $middleware = new $middlewareClass();
+            $next = fn($req) => $middleware->handle($req, $next);
+        }
+
+        return $next($request);
+    }
+
     protected function show404(bool $isApi = false): void
     {
-        header('HTTP/1.0 404 Not Found');
         if ($isApi) {
+            header('HTTP/1.0 404 Not Found');
             header('Content-Type: application/json');
             echo json_encode(['error' => 'API route not found']);
         } else {
+            header('HTTP/1.0 404 Not Found');
             View::render('errors/404.twig');
         }
         exit;
