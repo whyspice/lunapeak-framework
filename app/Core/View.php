@@ -38,9 +38,15 @@ class View
         self::$twig->addGlobal('app_url', Config::get('APP_URL'));
         self::$twig->addGlobal('app_debug', Config::get('APP_DEBUG'));
         self::$twig->addGlobal('unixtime', time());
+
         self::$twig->addFunction(new TwigFunction('csrf', function () {
             return '<input type="hidden" name="_csrf" value="' . htmlspecialchars(Csrf::generateToken()) . '">';
         }));
+        self::$twig->addFunction(new \Twig\TwigFunction('asset', 'App\Core\asset'));
+        self::$twig->addFunction(new \Twig\TwigFunction('route', 'App\Core\route'));
+        self::$twig->addFunction(new \Twig\TwigFunction('trans', 'App\Core\trans'));
+        self::$twig->addFunction(new \Twig\TwigFunction('session', 'App\Core\session'));
+        self::$twig->addFunction(new \Twig\TwigFunction('config', 'App\Core\config'));
     }
 
     public static function render($template, $data = [])

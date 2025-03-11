@@ -19,7 +19,6 @@ root@localhost:~ bash ./whyspice-work.sh
 # Connection closed by remote host.
 */
 define('BASE_PATH', realpath(__DIR__ . '/../'));
-
 require_once BASE_PATH . '/vendor/autoload.php';
 
 use App\Core\Database;

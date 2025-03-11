@@ -1,6 +1,6 @@
 <?php
 /*
-# Welcome to WHYSPICE OS 0.0.1 (GNU/Linux 3.13.0.129-generic x86_64)
+# Welcome to WHYSPICE OS v0.0.1 (GNU/Linux 3.13.0.129-generic x86_64)
 
 root@localhost:~ bash ./whyspice-work.sh
 > Executing...
@@ -18,22 +18,9 @@ root@localhost:~ bash ./whyspice-work.sh
 
 # Connection closed by remote host.
 */
-namespace App\Controllers;
-
-use App\Core\Request;
-use function App\Core\set_locale;
-use function App\Core\redirect;
-
-class HomeController
-{
-    public function index(Request $request)
-    {
-        return 'home.twig';
-    }
-
-    public function setLocale(Request $request, string $locale): void
-    {
-        set_locale($locale);
-        redirect($request->header('Referer', '/'));
-    }
-}
+return [
+    'welcome' => 'Добро пожаловать!',
+    'lunapeak_first_page' => 'Это ваша первая страница LunaPeak.',
+    'useful_links' => 'Полезные ссылки',
+    'user_registered' => 'User :username has been registered.',
+];

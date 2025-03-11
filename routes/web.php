@@ -28,6 +28,8 @@ use App\Middleware\AuthMiddleware;
 
 $router->get('/', [HomeController::class, 'index']);
 
+$router->get('/locale/{locale}', [HomeController::class, 'setLocale'], 'setLocale');
+
 $router->middleware(AuthMiddleware::class)->group('/users', function (Router $router) {
     $router->get('/{id}', [UserController::class, 'show']);
     $router->post('/create', [UserController::class, 'create']);

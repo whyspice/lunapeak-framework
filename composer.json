@@ -15,6 +15,7 @@
       "App\\": "app/",
       "Database\\Migrations\\": "database/migrations/",
       "Database\\Seeds\\": "database/seeds/"
-    }
+    },
+    "files": ["app/Core/Helpers.php"]
   }
 }

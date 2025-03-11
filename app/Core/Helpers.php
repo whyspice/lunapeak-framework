@@ -45,7 +45,7 @@ function route(string $name, array $params = []): string
 
 function asset(string $path): string
 {
-    return rtrim(BASE_URL, '/') . '/public/' . ltrim($path, '/');
+    return rtrim(BASE_URL, '/') . '/' . ltrim($path, '/');
 }
 
 function session(string $key, mixed $default = null): mixed
@@ -67,4 +67,25 @@ function redirect(string $url): never
 {
     header("Location: $url");
     exit;
+}
+
+function trans(string $key, array $replace = [], string $locale = null): string
+{
+    $locale = $locale ?? session('locale', config('APP_LOCALE', 'en'));
+    $translations = file_exists(BASE_PATH . "/lang/{$locale}/messages.php")
+        ? require BASE_PATH . "/lang/{$locale}/messages.php"
+        : [];
+
+    $translation = $translations[$key] ?? $key;
+
+    foreach ($replace as $param => $value) {
+        $translation = str_replace(":{$param}", $value, $translation);
+    }
+
+    return $translation;
+}
+
+function set_locale(string $locale): void
+{
+    set_session('locale', $locale);
 }
