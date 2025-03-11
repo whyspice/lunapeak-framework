@@ -15,17 +15,14 @@
 </head>
 <body class="bg-gradient-to-br from-slate-900 to-slate-800 min-h-screen flex items-center justify-center p-4">
 <div class="max-w-2xl w-full bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-    <div class="flex justify-between items-start mb-8 flex-wrap">
-        <div class="flex items-center gap-2">
-            <img src="https://fw.whyspice.su/static/img/logo.png" alt="LunaPeak Logo" class="w-24 h-24 sm:w-24 sm:h-24">
-            <h1 class="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                LunaPeak
-            </h1>
-        </div>
-        <div class="flex gap-1 sm:gap-2 mt-2 sm:mt-0">
-            <a href="{{ route('setLocale', {'locale': 'ru'}) }}" class="text-white/70 hover:text-white transition-colors text-sm sm:text-base px-2 py-1">РУС</a>
+    <div class="flex justify-between items-center flex-wrap">
+        <a href="/" class="flex items-center gap-2">
+            <img src="https://fw.whyspice.su/static/img/logo.png" alt="LunaPeak Logo" class="w-24 h-24">
+        </a>
+        <div class="flex gap-2 sm:gap-2 h-full items-center">
+            <a href="{{ route('setLocale', {'locale': 'ru'}) }}" class="text-white/70 hover:text-white transition-colors text-sm sm:text-base px-2 py-1 {{ get_locale() == 'ru' ? 'underline' : '' }}">РУС</a>
             <span class="text-white/50">|</span>
-            <a href="{{ route('setLocale', {'locale': 'en'}) }}" class="text-white/70 hover:text-white transition-colors text-sm sm:text-base px-2 py-1">ENG</a>
+            <a href="{{ route('setLocale', {'locale': 'en'}) }}" class="text-white/70 hover:text-white transition-colors text-sm sm:text-base px-2 py-1 {{ get_locale() == 'en' ? 'underline' : '' }}">ENG</a>
         </div>
     </div>
     {% block content %}{% endblock %}
