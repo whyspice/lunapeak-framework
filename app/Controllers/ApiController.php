@@ -20,9 +20,11 @@ root@localhost:~ bash ./whyspice-work.sh
 */
 namespace App\Controllers;
 
+use App\Core\Request;
+
 class ApiController
 {
-    public function getData()
+    public function getData(Request $request)
     {
         return [
             'status' => 'success',
@@ -30,9 +32,9 @@ class ApiController
         ];
     }
 
-    public function createData()
+    public function createData(Request $request)
     {
-        $input = json_decode(file_get_contents('php://input'), true);
+        $input = $request->all();
         return [
             'status' => 'success',
             'data' => ['received' => $input]
