@@ -22,7 +22,7 @@ namespace App\Core;
 
 class Router
 {
-    protected array $routes = [
+    public array $routes = [
         'GET' => [],
         'POST' => [],
         'PUT' => [],
@@ -44,6 +44,7 @@ class Router
             $router = $this;
             $originalRoutes = $this->routes;
             $this->currentPrefix = $prefix;
+            $this->currentMiddleware = [];
             require $file;
             $newRoutes = array_diff_key($this->routes, $originalRoutes);
             $this->currentPrefix = '';
@@ -82,52 +83,52 @@ class Router
         return $this;
     }
 
-    public function get(string $route, array $handler): void
+    public function get(string $route, array $handler, string $name = null): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['GET'][$fullRoute] = [$handler, $this->currentMiddleware];
+        $this->routes['GET'][$fullRoute] = [$handler, $this->currentMiddleware, $name];
     }
 
-    public function post(string $route, array $handler): void
+    public function post(string $route, array $handler, string $name = null): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['POST'][$fullRoute] = [$handler, $this->currentMiddleware];
+        $this->routes['POST'][$fullRoute] = [$handler, $this->currentMiddleware, $name];
     }
 
-    public function put(string $route, array $handler): void
+    public function put(string $route, array $handler, string $name = null): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['PUT'][$fullRoute] = [$handler, $this->currentMiddleware];
+        $this->routes['PUT'][$fullRoute] = [$handler, $this->currentMiddleware, $name];
     }
 
-    public function patch(string $route, array $handler): void
+    public function patch(string $route, array $handler, string $name = null): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['PATCH'][$fullRoute] = [$handler, $this->currentMiddleware];
+        $this->routes['PATCH'][$fullRoute] = [$handler, $this->currentMiddleware, $name];
     }
 
-    public function delete(string $route, array $handler): void
+    public function delete(string $route, array $handler, string $name = null): void
     {
         $fullRoute = $this->currentPrefix . $route;
-        $this->routes['DELETE'][$fullRoute] = [$handler, $this->currentMiddleware];
+        $this->routes['DELETE'][$fullRoute] = [$handler, $this->currentMiddleware, $name];
     }
 
-    public function match(array $methods, string $route, array $handler): void
+    public function match(array $methods, string $route, array $handler, string $name = null): void
     {
         $fullRoute = $this->currentPrefix . $route;
         foreach ($methods as $method) {
             $method = strtoupper($method);
             if (array_key_exists($method, $this->routes)) {
-                $this->routes[$method][$fullRoute] = [$handler, $this->currentMiddleware];
+                $this->routes[$method][$fullRoute] = [$handler, $this->currentMiddleware, $name];
             }
         }
     }
 
-    public function any(string $route, array $handler): void
+    public function any(string $route, array $handler, string $name = null): void
     {
         $fullRoute = $this->currentPrefix . $route;
         foreach ($this->routes as $method => &$paths) {
-            $paths[$fullRoute] = [$handler, $this->currentMiddleware];
+            $paths[$fullRoute] = [$handler, $this->currentMiddleware, $name];
         }
     }
 

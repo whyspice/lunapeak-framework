@@ -25,10 +25,18 @@ use App\Core\Storage;
 use App\Core\UploadedFile;
 use App\Core\Validator;
 use App\Core\Request;
+use App\Core\Event;
+use App\Events\UserRegistered;
+use App\Listeners\SendWelcomeEmail;
 use App\Models\User;
 
 class UserController
 {
+    public function __construct()
+    {
+        Event::listen(UserRegistered::class, SendWelcomeEmail::class);
+    }
+
     protected function validate(array $data, array $rules, array $messages = []): void
     {
         Validator::make($data, $rules, $messages)->validate();
@@ -101,6 +109,8 @@ class UserController
             'password' => Hash::make($request->input('password')),
             'email' => $request->input('email'),
         ]);
+
+        Event::fire(UserRegistered::class, new UserRegistered($user->username, $user->email));
 
         return "User {$user->username} registered with ID: {$user->id}";
     }

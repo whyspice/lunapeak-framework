@@ -30,6 +30,7 @@ use Tracy\Debugger;
 
 session_start();
 Config::load();
+define('BASE_URL', Config::get('APP_URL', 'http://localhost'));
 
 if (Config::get('APP_DEBUG', false)) {
     Debugger::enable(Debugger::DEVELOPMENT);
