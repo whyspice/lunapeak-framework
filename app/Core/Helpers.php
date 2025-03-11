@@ -89,3 +89,8 @@ function set_locale(string $locale): void
 {
     set_session('locale', $locale);
 }
+
+function get_locale(): string
+{
+    return session('locale');
+}

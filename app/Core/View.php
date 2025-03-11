@@ -47,6 +47,7 @@ class View
         self::$twig->addFunction(new \Twig\TwigFunction('trans', 'App\Core\trans'));
         self::$twig->addFunction(new \Twig\TwigFunction('session', 'App\Core\session'));
         self::$twig->addFunction(new \Twig\TwigFunction('config', 'App\Core\config'));
+        self::$twig->addFunction(new \Twig\TwigFunction('get_locale', 'App\Core\get_locale'));
     }
 
     public static function render($template, $data = [])

@@ -24,6 +24,8 @@ return [
     'language' => 'Language',
     'useful_links' => 'Useful links',
     'successfull_install' => 'successfuly installed',
+    'start' => 'Get started',
+    'developer' => 'Developer',
     'error' => 'Error',
     'error_403' => '403 - Access denied',
     'error_404' => '404 - Page not found',
