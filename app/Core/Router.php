@@ -124,8 +124,9 @@ class Router
 
     public function dispatch(): void
     {
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // Учитываем только путь
-        $method = $_SERVER['REQUEST_METHOD'];
+        $request = Request::capture();
+        $uri = $request->path();
+        $method = $request->method();
         $isApi = strpos($uri, '/api') === 0;
 
         foreach ($this->routes[$method] as $route => $handler) {
@@ -135,7 +136,19 @@ class Router
                 array_shift($matches);
                 [$controller, $action] = $handler;
                 $instance = new $controller();
-                $response = call_user_func_array([$instance, $action], $matches);
+
+                $reflection = new \ReflectionMethod($instance, $action);
+                $parameters = $reflection->getParameters();
+                $args = [];
+                foreach ($parameters as $param) {
+                    if ($param->getType() && $param->getType()->getName() === Request::class) {
+                        $args[] = $request;
+                    } else {
+                        $args[] = array_shift($matches);
+                    }
+                }
+
+                $response = $reflection->invokeArgs($instance, $args);
                 if ($isApi) {
                     header('Content-Type: application/json');
                     echo json_encode($response);

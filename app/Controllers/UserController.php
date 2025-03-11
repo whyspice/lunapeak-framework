@@ -21,9 +21,11 @@ root@localhost:~ bash ./whyspice-work.sh
 namespace App\Controllers;
 
 use App\Core\Hash;
-use App\Core\UploadedFile;
 use App\Core\Storage;
+use App\Core\UploadedFile;
 use App\Core\Validator;
+use App\Core\Request;
+use App\Models\User;
 
 class UserController
 {
@@ -32,29 +34,40 @@ class UserController
         Validator::make($data, $rules, $messages)->validate();
     }
 
-    public function show(string $id): string
+    public function show(Request $request, string $id): string
     {
-        return View::render('user/profile.twig', ['id' => $id]);
+        $user = User::findOrFail($id);
+        return View::render('user/show.twig', ['user' => $user]);
     }
 
-    public function update(string $user): string
+    public function edit(Request $request, string $user): string
     {
-        $this->validate($_POST, [
-            'username' => 'required|min:3|max:50',
+        $user = User::findOrFail($user);
+        return View::render('user/edit.twig', ['user' => $user]);
+    }
+
+    public function update(Request $request, string $user): string
+    {
+        $this->validate($request->all(), [
+            'name' => 'required|min:3|max:50',
             'email' => 'required|email',
         ]);
 
-        return "User {$user} updated";
+        $user = User::findOrFail($user);
+        $user->update($request->only(['name', 'email']));
+        return "User {$user->id} updated";
     }
 
-    public function delete(string $user): string
+    public function delete(Request $request, string $user): string
     {
-        return "User {$user} deleted";
+        $user = User::findOrFail($user);
+        $user->delete();
+        return "User {$user->id} deleted";
     }
 
-    public function uploadAvatar(): string
+    public function uploadAvatar(Request $request): string
     {
-        $file = UploadedFile::createFromGlobal('avatar');
+        $file = $request->file('avatar');
         $this->validate(
             ['avatar' => $file],
             ['avatar' => 'required|file|mimes:jpg,png'],
@@ -62,21 +75,33 @@ class UserController
         );
 
         $path = $file->store('avatars');
-        $url = Storage::disk()->url($path);
+        $url = Storage::disk('public')->url($path);
 
-        return $url;
+        $userId = $request->input('user_id');
+        if ($userId) {
+            $user = User::find($userId);
+            if ($user) {
+                $user->update(['avatar' => $url]);
+            }
+        }
+
+        return "File uploaded to: $url";
     }
 
-    public function create(): string
+    public function register(Request $request): string
     {
-        $this->validate($_POST, [
+        $this->validate($request->all(), [
             'username' => 'required|min:3|max:20',
             'password' => 'required|min:6',
+            'email' => 'required|email',
         ]);
 
-        $username = $_POST['username'];
-        $password = Hash::make($_POST['password']);
+        $user = User::create([
+            'username' => $request->input('username'),
+            'password' => Hash::make($request->input('password')),
+            'email' => $request->input('email'),
+        ]);
 
-        return "User {$username} registered.";
+        return "User {$user->username} registered with ID: {$user->id}";
     }
 }

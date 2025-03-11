@@ -7,12 +7,14 @@
     "twig/twig": "^3.0",
     "tracy/tracy": "^2.9",
     "predis/predis": "^2.0",
-    "gabordemooij/redbean": "dev-master",
+    "illuminate/database": "^11.0",
     "vlucas/phpdotenv": "^5.5"
   },
   "autoload": {
     "psr-4": {
-      "App\\": "app/"
+      "App\\": "app/",
+      "Database\\Migrations\\": "database/migrations/",
+      "Database\\Seeds\\": "database/seeds/"
     }
   }
 }

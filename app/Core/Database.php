@@ -18,36 +18,72 @@ root@localhost:~ bash ./whyspice-work.sh
 
 # Connection closed by remote host.
 */
+
 namespace App\Core;
 
-use \RedBeanPHP\R as R;
+use Illuminate\Database\Capsule\Manager as Capsule;
+use Illuminate\Database\Connection;
+use PDOException;
 
 class Database
 {
+    protected static ?Capsule $capsule = null;
+
     public static function connect(): void
     {
-        $driver = Config::get('DB_CONNECTION');
-        $host = Config::get('DB_HOST');
-        $database = Config::get('DB_DATABASE');
-        $username = Config::get('DB_USERNAME', '');
-        $password = Config::get('DB_PASSWORD', '');
+        if (self::$capsule === null) {
+            try {
+                $capsule = new Capsule();
 
-        if (!$driver || !$host || !$database) {
-            throw new \RuntimeException('Invalid database configuration');
+                $driver = Config::get('DB_CONNECTION', 'mysql');
+                $host = Config::get('DB_HOST');
+                $database = Config::get('DB_DATABASE');
+                $username = Config::get('DB_USERNAME', '');
+                $password = Config::get('DB_PASSWORD', '');
+
+                if (!$driver || !$host || !$database) {
+                    throw new \RuntimeException('Invalid database configuration');
+                }
+
+                $capsule->addConnection([
+                    'driver' => $driver,
+                    'host' => $host,
+                    'database' => $database,
+                    'username' => $username,
+                    'password' => $password,
+                    'charset' => 'utf8mb4',
+                    'collation' => 'utf8mb4_unicode_ci',
+                    'prefix' => '',
+                ]);
+
+                $capsule->setAsGlobal();
+                $capsule->bootEloquent();
+
+                $capsule->getConnection()->getPdo();
+                self::$capsule = $capsule;
+            } catch (PDOException $e) {
+                View::render('/errors/error.twig', [
+                    'error' => [
+                        'title' => 'Database Error!',
+                        'text' => 'Could not connect to database: ' . $e->getMessage(),
+                    ]
+                ]);
+                exit;
+            } catch (\RuntimeException $e) {
+                View::render('/errors/error.twig', [
+                    'error' => [
+                        'title' => 'Configuration Error!',
+                        'text' => $e->getMessage(),
+                    ]
+                ]);
+                exit;
+            }
         }
+    }
 
-        $dsn = "{$driver}:host={$host};dbname={$database}";
-        R::setup($dsn, $username, $password);
-        R::freeze(true);
-
-        if (!R::testConnection()) {
-            View::render('/errors/error.twig', [
-                'error' => [
-                    'title' => 'Error!',
-                    'text' => 'Could not connect to database.'
-                ]
-            ]);
-            exit;
-        }
+    public static function getCapsule(): Capsule
+    {
+        self::connect();
+        return self::$capsule;
     }
 }

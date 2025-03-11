@@ -20,33 +20,32 @@ root@localhost:~ bash ./whyspice-work.sh
 */
 namespace App\Models;
 
-use R;
+use Illuminate\Database\Eloquent\Model;
 
-class User
+class User extends Model
 {
-    public function create($user)
-    {
-        $user = R::dispense('users');
-        $user->username = $user['username'];
-        $user->password = $user['password'];
-        $user->email = $user['email'];
-        $user->avatar = null;
-        $user->group = null;
-        $user->register_ip = null;
-        $user->created_at = time();
-        $user->updated_at = time();
-        $user->deleted_at = null;
-        R::store($user);
-        return $user->id;
-    }
+    protected $table = 'users';
+    protected $fillable = [
+        'username',
+        'password',
+        'email',
+        'avatar',
+        'group',
+        'register_ip',
+    ];
 
-    public function update($user)
-    {
-        return 'updated';
-    }
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
-    public function delete($user)
+    public $timestamps = true;
+
+    public static function create(array $attributes = [])
     {
-        return 'deleted';
+        $attributes['created_at'] = time();
+        $attributes['updated_at'] = time();
+        return parent::create($attributes);
     }
 }
