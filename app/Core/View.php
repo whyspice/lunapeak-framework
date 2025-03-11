@@ -59,7 +59,7 @@ class View
             echo self::$twig->render($template, $data);
         } catch (\Twig\Error\LoaderError $e) {
             header("HTTP/1.0 404 Not Found");
-            echo self::$twig->render('errors/404.twig');
+            echo self::$twig->render('errors/error.twig', ["error" => "error_404"]);
             exit;
         }
     }

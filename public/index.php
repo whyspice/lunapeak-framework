@@ -31,10 +31,11 @@ session_start();
 Config::load();
 define('BASE_URL', Config::get('APP_URL', 'http://localhost'));
 
-if (Config::get('APP_DEBUG', false)) {
+if (Config::get('APP_DEBUG', false) == 'true') {
     Debugger::enable(Debugger::DEVELOPMENT);
 } else {
     Debugger::enable(Debugger::PRODUCTION);
+    Debugger::$showBar = false;
 }
 
 //Database::connect();

@@ -20,11 +20,13 @@ root@localhost:~ bash ./whyspice-work.sh
 */
 namespace App\Controllers;
 
+use App\Core\View;
+
 class ErrorController
 {
     public function show403()
     {
         header("HTTP/1.0 403 Forbidden");
-        return 'errors/403.twig';
+        View::render('errors/error.twig', ["error" => "error_403"]);
     }
 }

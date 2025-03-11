@@ -23,5 +23,10 @@ return [
     'lunapeak_first_page' => 'This is the your LunaPeak first page.',
     'language' => 'Language',
     'useful_links' => 'Useful links',
+    'successfull_install' => 'successfuly installed',
+    'error' => 'Error',
+    'error_403' => '403 - Access denied',
+    'error_404' => '404 - Page not found',
+    'go_back' => 'Go back',
     'user_registered' => 'User :username has been registered.',
 ];

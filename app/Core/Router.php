@@ -195,7 +195,7 @@ class Router
             echo json_encode(['error' => 'API route not found']);
         } else {
             header('HTTP/1.0 404 Not Found');
-            View::render('errors/404.twig');
+            View::render('errors/error.twig', ["error" => "error_404"]);
         }
         exit;
     }

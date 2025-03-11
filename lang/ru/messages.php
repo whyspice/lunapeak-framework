@@ -23,5 +23,10 @@ return [
     'lunapeak_first_page' => 'Это ваша первая страница LunaPeak.',
     'language' => 'Язык',
     'useful_links' => 'Полезные ссылки',
+    'successfull_install' => 'успешно установлен',
+    'error' => 'Ошибка',
+    'error_403' => '403 - Доступ запрещен',
+    'error_404' => '404 - Страница не найдена',
+    'go_back' => 'Вернуться назад',
     'user_registered' => 'User :username has been registered.',
 ];
