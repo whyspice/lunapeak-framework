@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
 define('BASE_PATH', realpath(__DIR__));
-require __DIR__ . '/vendor/autoload.php';
+
+require BASE_PATH . '/vendor/autoload.php';
 
 use App\Core\Config;
 use App\Core\Database;
@@ -11,6 +12,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 Config::load();
@@ -29,7 +31,6 @@ if (!$repository->repositoryExists()) {
 
 $console = new Application('LunaPeak Artisan', '1.0.0');
 
-// make:migration
 $console->register('make:migration')
     ->setDefinition([
         new InputArgument('name', InputArgument::REQUIRED, 'The name of the migration'),
@@ -39,7 +40,7 @@ $console->register('make:migration')
         $name = $input->getArgument('name');
         $timestamp = date('Y_m_d_His');
         $filename = "{$timestamp}_{$name}.php";
-        $path = __DIR__ . '/database/migrations/' . $filename;
+        $path = BASE_PATH . '/database/migrations/' . $filename;
 
         $stub = <<<EOT
 <?php
@@ -68,27 +69,24 @@ EOT;
         $output->writeln("<info>Created Migration:</info> {$filename}");
     });
 
-// migrate
 $console->register('migrate')
     ->setDescription('Run the database migrations')
     ->setCode(function (InputInterface $input, OutputInterface $output) use ($migrator) {
-        $migrator->run(__DIR__ . '/database/migrations');
+        $migrator->run(BASE_PATH . '/database/migrations');
         foreach ($migrator->getNotes() as $note) {
             $output->writeln($note);
         }
     });
 
-// migrate:rollback
 $console->register('migrate:rollback')
     ->setDescription('Rollback the last database migration')
     ->setCode(function (InputInterface $input, OutputInterface $output) use ($migrator) {
-        $migrator->rollback(__DIR__ . '/database/migrations');
+        $migrator->rollback(BASE_PATH . '/database/migrations');
         foreach ($migrator->getNotes() as $note) {
             $output->writeln($note);
         }
     });
 
-// migrate:fresh
 $console->register('migrate:fresh')
     ->setDescription('Drop all tables and re-run all migrations')
     ->setCode(function (InputInterface $input, OutputInterface $output) use ($migrator) {
@@ -99,9 +97,73 @@ $console->register('migrate:fresh')
         }
         $output->writeln('<info>Dropped all tables successfully.</info>');
 
-        $migrator->run(__DIR__ . '/database/migrations');
+        $migrator->run(BASE_PATH . '/database/migrations');
         foreach ($migrator->getNotes() as $note) {
             $output->writeln($note);
+        }
+    });
+
+$console->register('make:model')
+    ->setDefinition([
+        new InputArgument('name', InputArgument::REQUIRED, 'The name of the model'),
+        new InputOption('migration', 'm', InputOption::VALUE_NONE, 'Generate a migration file with the model'),
+    ])
+    ->setDescription('Create a new Eloquent model class')
+    ->setCode(function (InputInterface $input, OutputInterface $output) use ($files) {
+        $name = $input->getArgument('name');
+        $migration = $input->getOption('migration');
+
+        $modelPath = BASE_PATH . '/app/models/' . $name . '.php';
+        $tableName = strtolower($name) . 's';
+
+        $modelStub = <<<EOT
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class {$name} extends Model
+{
+    protected \$table = '{$tableName}';
+    protected \$fillable = [];
+}
+EOT;
+
+        $files->ensureDirectoryExists(BASE_PATH . '/app/models');
+        $files->put($modelPath, $modelStub);
+        $output->writeln("<info>Created Model:</info> {$name}.php");
+
+        if ($migration) {
+            $timestamp = date('Y_m_d_His');
+            $migrationName = "create_{$tableName}_table";
+            $migrationPath = BASE_PATH . '/database/migrations/' . "{$timestamp}_{$migrationName}.php";
+
+            $migrationStub = <<<EOT
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('{$tableName}', function (Blueprint \$table) {
+            \$table->id();
+            \$table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('{$tableName}');
+    }
+};
+EOT;
+
+            $files->ensureDirectoryExists(BASE_PATH . '/database/migrations');
+            $files->put($migrationPath, $migrationStub);
+            $output->writeln("<info>Created Migration:</info> {$timestamp}_{$migrationName}.php");
         }
     });
 

@@ -7,7 +7,7 @@
 ## Особенности
 
 - **Кастомный роутинг**.
-- **ORM RedBeanPHP** для простой работы с базой данных.
+- **Eloquent ORM** для работы с базой данных.
 - **Шаблонизатор Twig** для рендеринга представлений.
 - **Отладка с Tracy** для удобного анализа ошибок.
 - **Система очередей** на основе Redis.
@@ -35,8 +35,22 @@
    git clone https://github.com/spicexgod/LunaPeak.git
    cd LunaPeak
    
-2. **Настройка:**
-- Отредактируйте файлы config/app.php, config/database.php и config/queue.php, указав свои параметры (URL приложения, данные для подключения к базе данных и Redis).
+2. **Установите зависимости:**
+   ```bash
+   composer install
+
+3. **Настройте окружение:**
+   - Скопируйте .env.example в .env и укажите параметры базы данных
+   ```
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_DATABASE=lunapeak
+   DB_USERNAME=root
+   DB_PASSWORD=
+
+4. Создайте структуру базы данных:
+   ```
+   php artisan migrate
 
 ---
 
@@ -46,61 +60,16 @@
 ├── /app
 │   ├── /controllers    # Контроллеры
 │   ├── /core           # Ядро фреймворка
-│   └── /models         # Модели для работы с данными
+│   └── /models         # Модели Eloquent
+├── /database
+│   └── /migrations     # Миграции базы данных
 ├── /views              # Шаблоны Twig
-├── /config             # Файлы конфигурации
 ├── /public             # Публичная директория (точка входа)
 ├── /vendor             # Зависимости Composer
+├── artisan             # CLI
 └── .env                # Файл конфигурации
 ```
 
 ---
 
 ## Пример использования
-
-1. **Создание маршрута и контроллера:**  
-    Добавьте маршрут в public/index.php:
-    ```
-    $router->get('/hello', 'HelloController@index');
-    ```
-    
-    Создайте контроллер app/controllers/HelloController.php:
-    ```
-    <?php
-    namespace App\Controllers;
-    
-    class HelloController {
-        public function index() {
-            return 'hello.twig';
-        }
-    }
-    ```
-    
-    Создайте шаблон app/views/hello.twig:
-    ```
-    <h1>Hello, LunaPeak!</h1>
-    ```
-
-2. **Работа с API:**  
-   Маршрут для API:
-    ```
-    $router->get('/api/user', 'ApiController@getUser');
-    ```
-   Контроллер app/controllers/ApiController.php:
-    ```
-    <?php
-    namespace App\Controllers;
-    
-    class ApiController {
-       public function getUser() {
-          return ['id' => 1, 'name' => 'Luna'];
-       }
-    }
-    ```
-   Запрос GET /api/user вернет JSON:
-    ```
-    {"id": 1, "name": "Luna"}
-    ```
-
-3. **Работа с очередью:**  
-    ...
