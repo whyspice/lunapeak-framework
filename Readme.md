@@ -61,6 +61,7 @@
 │   ├── /controllers    # Контроллеры
 │   ├── /core           # Ядро фреймворка
 │   └── /models         # Модели Eloquent
+│   └── /middleware
 ├── /database
 │   └── /migrations     # Миграции базы данных
 ├── /views              # Шаблоны Twig
