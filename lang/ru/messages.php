@@ -21,6 +21,7 @@ root@localhost:~ bash ./whyspice-work.sh
 return [
     'welcome' => 'Добро пожаловать!',
     'lunapeak_first_page' => 'Это ваша первая страница LunaPeak.',
+    'language' => 'Язык',
     'useful_links' => 'Полезные ссылки',
     'user_registered' => 'User :username has been registered.',
 ];
