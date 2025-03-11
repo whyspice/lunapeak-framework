@@ -41,11 +41,4 @@ class User extends Model
     ];
 
     public $timestamps = true;
-
-    public static function create(array $attributes = [])
-    {
-        $attributes['created_at'] = time();
-        $attributes['updated_at'] = time();
-        return parent::create($attributes);
-    }
 }
